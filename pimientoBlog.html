@@ -1,0 +1,200 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Pimient0 Blog</title>
+    <link href="pimiento.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+    <div id="contenedor">
+
+        <div id="cabecera">
+            <div id="logo">
+                <h1><a href="pimiento.html">Pimiento <img src="img/logo.png"> </a></h1>
+            </div>
+            <div id="identidad">
+                <p>La página definitiva para los amantes de la cocina.</p>
+            </div>
+            <div id="buscador">
+                <form id="formBuscador" action="#" method="post" onsubmit="return false;">
+                    Buscar <input name="busqueda" id="inputBusqueda" type="text" />
+                </form>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <div id="sidebar">
+            <div class="menu-item" id="temporizador">
+                Cronómetro
+                <div class="floating-box">
+                    <h3>Cronómetro</h3>
+                    <div class="timer-display">00:00:00</div>
+                    <div class="timer-buttons">
+                        <button>Iniciar</button>
+                        <button>Borrar</button>
+                        <button>Pausar</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item" id="conversor">
+                Conversor
+                <div class="floating-box">
+                    <h3>Conversor de medidas</h3>
+                    <div class="conversor-contenido">
+                        <p>Peso</p>
+                        <input type="number" id="g-input" placeholder="Gramos" value="0">
+                        <span>=</span>
+                        <input type="number" id="oz-input" placeholder="Onzas" readonly>
+                        <select id="conversor-medidas">
+                            <option value="g-oz">Gramos a Onzas</option>
+                            <option value="oz-g">Onzas a Gramos</option>
+                            <option value="kg-lb">Kilogramos a Libras</option>
+                            <option value="lb-kg">Libras a Kilogramos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <a href="pimientoRecetas.html">Recetas</a>
+            </div>
+
+            <div class="menu-item">
+                <a href="pimientoBlog.html">Blog</a>
+            </div>
+            
+            <div class="menu-item">
+                <a href="pimientoPublicar.html">Publicar</a>
+            </div>
+        </div>
+
+        <div id="contenido">
+            <div id="principal" style="float:left; width:70%;">
+                <!-- Aquí se cargarán las publicaciones -->
+            </div>
+            <div id="perfilUsuario">
+                <!-- Aquí se mostrará el usuario y la descripción de perfil -->
+            </div>
+            
+        </div>
+
+        
+        
+        <div class="clear"></div>
+        
+        <div id="pie">
+            <span class="enlaces">
+                <a href="pimientoLogin.html"> <img src="img/chef-cap-7.png"/> </a>
+            </span>
+        </div>
+    </div>
+
+    <script src="temporizador.js"></script>
+    <script src="blogs.js"></script>
+    <script>
+        // Conversor igual que en recetas
+        document.getElementById('conversor').addEventListener('click', function(){
+            this.classList.toggle('active');
+        });
+
+        function conversorMedidas(value,conversorContenido){
+            switch(conversorContenido){
+                case 'g-oz': return value*0.035274;
+                case 'oz-g': return value/0.035274;
+                case 'kg-lb': return value*2.20463;
+                case 'lb-kg': return value/2.20462;
+                default: return value;
+            }
+        }
+
+        function setupConversor(){
+            const gInput= document.getElementById('g-input');
+            const ozInput= document.getElementById('oz-input');
+            const select= document.getElementById('conversor-medidas');
+
+            function actualizar(){
+                const tipo= select.value;
+                if( tipo==='g-oz'){
+                    ozInput.readOnly = true;
+                    gInput.readOnly = false;
+                    ozInput.value= conversorMedidas(Number(gInput.value), tipo).toFixed(2);
+                }
+                if( tipo==='oz-g'){
+                    gInput.readOnly = true;
+                    ozInput.readOnly = false;
+                    gInput.value= conversorMedidas(Number(ozInput.value),tipo).toFixed(2);
+                }
+                if( tipo==='kg-lb'){
+                    ozInput.readOnly = true;
+                    gInput.readOnly = false;
+                    ozInput.value= conversorMedidas(Number(gInput.value),tipo).toFixed(2);
+                    gInput.placeholder = 'Kilogramos';
+                    ozInput.placeholder = 'Libras';
+                }
+                if( tipo==='lb-kg'){
+                    gInput.readOnly = true;
+                    ozInput.readOnly = false;
+                    gInput.value= conversorMedidas(Number(ozInput.value),tipo).toFixed(2);
+                    gInput.placeholder = 'Kilogramos';
+                    ozInput.placeholder = 'Libras';
+                }
+            }
+
+            gInput.addEventListener('input', actualizar);
+            ozInput.addEventListener('input',actualizar);
+            select.addEventListener('change', function(){
+                gInput.value=0;
+                ozInput.value= '';
+                gInput.placeholder = select.value.includes('kg') ? "Kilogramos" : "Gramos";
+                ozInput.placeholder = select.value.includes('lb') ? "Libras" : "Onzas";
+                actualizar();
+            });
+
+            actualizar();
+        }
+        setupConversor();
+
+        // Cargar publicaciones
+        document.addEventListener('DOMContentLoaded', function(){
+            const principal = document.getElementById('principal');
+            const publicaciones = JSON.parse(localStorage.getItem('publicaciones')) || [];
+
+            publicaciones.forEach(pub => {
+                const div = document.createElement('div');
+                div.className = "publicacion";
+                div.style = "background:#fff; margin-bottom:1em; padding:1em; border-radius:8px; box-shadow:0 2px 8px #eee;";
+                div.innerHTML = `
+                    <div style="font-weight:bold;">${pub.usuario}</div>
+                    <div style="font-size:0.9em; color:#888;">${pub.fechaHora}</div>
+                    <div style="margin-top:0.5em;">${pub.contenido}</div>
+                `;
+                principal.appendChild(div);
+            });
+
+            // Mostrar usuario y descripción de perfil (ejemplo: el primero guardado)
+            const perfilDiv = document.getElementById('perfilUsuario');
+            const usuarioLogueado = JSON.parse(localStorage.getItem('usuarioLogueado'));
+            if(usuarioLogueado){
+                perfilDiv.innerHTML = `
+                    <h3>${usuarioLogueado.usuario}</h3>
+                    <p>${usuarioLogueado.descripcionPerfil}</p>
+                    <button id="cerrarSesionBtn">Cerrar sesión</button>
+                `;
+                document.getElementById('cerrarSesionBtn').onclick = function() {
+                    localStorage.removeItem('usuarioLogueado');
+                    window.location.href = "pimientoLogin.html";
+                };
+            } else {
+                perfilDiv.innerHTML = `<p>No hay usuario logueado.</p>`;
+            }
+        });
+        //Redirigir al usuario a pimientoRecetas con los resultados de la busqueda
+        document.getElementById('formBuscador').addEventListener('submit', function(e){
+            e.preventDefault();
+            const termino = document.getElementById('inputBusqueda').value.trim();
+            localStorage.setItem('terminoBusqueda', termino);
+            window.location.href = "pimientoRecetas.html";
+        });
+    </script>
+</body>
+</html>

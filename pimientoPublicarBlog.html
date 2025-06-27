@@ -1,0 +1,77 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Pimient0 - Publicar Blog</title>
+    <link href="pimiento.css" rel="stylesheet" type="text/css" />
+    <script src="blogs.js"></script>
+</head>
+<body>
+    <div id="contenedor">
+        <div id="cabecera">
+            <div id="logo">
+                <h1><a href="pimiento.html">Pimiento <img src="img/logo.png"> </a></h1>
+            </div>
+            <div id="identidad">
+                <p>La página definitiva para los amantes de la cocina.</p>
+            </div>
+            <div class="clear"></div>
+        </div>
+
+        <div id="contenido">
+            <div id="principal">
+                <h2>Publicar en el Blog</h2>
+                <form id="formPublicarBlog">
+                    <label for="contenidoBlog">Contenido de la publicación:</label><br>
+                    <textarea id="contenidoBlog" rows="6" cols="60" required></textarea><br><br>
+                    <button type="submit" id="publicarBlog">Publicar</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="clear"></div>
+        
+        <div id="pie">
+            <span class="enlaces">
+                <a href="pimientoLogin.html"> <img src="img/chef-cap-7.png"/> </a>
+            </span>
+        </div>
+    </div>
+
+    <script>
+    // Verificar sesión de usuario
+    document.addEventListener('DOMContentLoaded', function() {
+        // Se espera que al iniciar sesión guardes el usuario así:
+        // localStorage.setItem('usuarioLogueado', JSON.stringify(usuario));
+        const usuarioLogueado = JSON.parse(localStorage.getItem('usuarioLogueado'));
+        if (!usuarioLogueado) {
+            window.location.href = "pimientoLogin.html";
+            return;
+        }
+
+        // Manejar publicación
+        document.getElementById('formPublicarBlog').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const contenido = document.getElementById('contenidoBlog').value.trim();
+            if (!contenido) {
+                alert("El contenido no puede estar vacío.");
+                return;
+            }
+
+            // Modelo de publicación
+            const publicacion = {
+                usuario: usuarioLogueado.usuario,
+                fechaHora: new Date().toLocaleString(),
+                contenido: contenido
+            };
+
+            let publicaciones = JSON.parse(localStorage.getItem('publicaciones')) || [];
+            publicaciones.push(publicacion);
+            localStorage.setItem('publicaciones', JSON.stringify(publicaciones));
+
+            alert("¡Publicación realizada!");
+            this.reset();
+            window.location.href = "pimientoBlog.html";
+        });
+    });
+    </script>
+</body>

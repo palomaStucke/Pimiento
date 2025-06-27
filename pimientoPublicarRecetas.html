@@ -1,0 +1,172 @@
+<html>
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <title>Pimient0</title>
+    <link href="pimiento.css" rel="stylesheet" type="text/css" />
+    <script src="pimiento.js"></script>
+</head>
+<body>
+    <div id="contenedor">
+
+        <div id="cabecera">
+            <div id="logo">
+                <h1><a href="pimiento.html">Pimiento <img src="img/logo.png"> </a></h1>
+            </div>
+
+            <div id="identidad">
+                <p>La página definitiva para los amantes de la cocina.</p>
+            </div>
+
+            <div class="clear"></div>
+        </div>
+
+
+        <div id="contenido">
+            <div id="principal">
+                <form id="subirReceta">
+                    <table>
+                        <tr>
+                            <td>Nombre:</td>
+                            <td>
+                                <input type="text" id="nombreReceta">
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Breve descripción:</td>
+                            <td>
+                                <textarea rows="3" cols="40" id="descripcionReceta"></textarea>
+                            </td>
+                        </tr>
+
+                        <tr>
+                            <td>Ingredientes:</td>
+                            <td>
+                                <input type="text" name="ingredientes[]" class="ingrediente">
+                                <button type="button" id="agregarIngrediente">Agregar ingrediente</button>
+                            </td>
+                        </tr>
+                        <!--Aca se insertan todos los ingredientes que el usuario quiera-->
+                        <tr id="filaAgregarIngredientes"><td colspan="2"></td></tr>
+                        <tr>
+                            <td>Pasos:</td>
+                            <td>
+                                <textarea rows="3" cols="40" name="pasos[]" class="paso"></textarea>
+                                <button type="button" id="agregarPaso">Agregar paso</button>
+                            </td>
+                        </tr>
+                        <!--Aca se insertan todos los pasos que el usuario quiera-->
+                        <tr id="filaAgregarPasos"><td colspan="2"></td></tr>
+                        <tr>
+                            <td>Imagen:</td>
+                            <td>
+                                <input type="file" id="imagenReceta" accept="image/*">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: right;">
+                                <button type="submit" id="publicarReceta">Publicar</button>
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+            </div>
+
+        </div>
+        
+        <div class="clear"></div>
+        
+        <div id="pie">
+            <span class="enlaces">
+                <a href="pimientoLogin.html"> <img src="img/chef-cap-7.png"/> </a>
+            </span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function(){
+            //Ingredientes
+            const tabla= document.querySelector('#subirReceta table');
+            const tbody = tabla.tBodies[0];
+            const agregarIngredienteBtn= document.getElementById('agregarIngrediente');
+            const filaAgregarIngredientes= document.getElementById('filaAgregarIngredientes');
+
+            agregarIngredienteBtn.addEventListener('click',function(){
+                const nuevaFila = document.createElement('tr');
+                const td1 = document.createElement('td');
+                const td2 = document.createElement('td');
+                td1.textContent = ""; // Primera columna vacía
+                td2.innerHTML = "<input type='text' name='ingredientes[]' class='ingrediente'>";
+                nuevaFila.appendChild(td1);
+                nuevaFila.appendChild(td2);
+                tbody.insertBefore(nuevaFila, filaAgregarIngredientes);
+            });
+
+            //Pasos
+            const agregarPasosBtn= document.getElementById('agregarPaso');
+            const filaAgregarPasos= document.getElementById('filaAgregarPasos');
+
+            agregarPasosBtn.addEventListener('click',function(){
+                const nuevaFila = document.createElement('tr');
+                const td1 = document.createElement('td');
+                const td2 = document.createElement('td');
+                td1.textContent = ""; // Primera columna vacía
+                td2.innerHTML = "<textarea rows='3' cols='40' name='pasos[]' class='paso'></textarea>";
+                nuevaFila.appendChild(td1);
+                nuevaFila.appendChild(td2);
+                tbody.insertBefore(nuevaFila, filaAgregarPasos);
+            });
+        });
+    </script>
+    <script>
+        document.getElementById('subirReceta').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        // Obtengo los valores del formulario
+        const nombre = document.getElementById('nombreReceta').value.trim();
+        const descripcion = document.getElementById('descripcionReceta').value.trim();
+
+        // Obtengo todos los ingredientes
+        const ingredientes = Array.from(document.querySelectorAll('input.ingrediente'))
+            .map(input => input.value.trim())
+            .filter(val => val);
+
+        // Obtengo todos los pasos
+        const pasos = Array.from(document.querySelectorAll('textarea.paso'))
+            .map(textarea => textarea.value.trim())
+            .filter(val => val);
+        
+        //Obtengo la imagen
+        const imagenInput= document.getElementById('imagenReceta');
+        const archivoImagen= imagenInput.files[0];
+
+        function guardarReceta(imagenBase64) {
+            const receta = {
+                nombre,
+                descripcion,
+                ingredientes,
+                pasos,
+                imagen: imagenBase64 || ""
+            };
+            let recetas = JSON.parse(localStorage.getItem('recetas')) || [];
+            recetas.push(receta);
+            localStorage.setItem('recetas', JSON.stringify(recetas));
+            alert('¡Receta publicada!');
+            document.getElementById('subirReceta').reset(); //Limpio el formulario
+            window.location.href = "pimientoRecetas.html"; // Redirige a recetas
+        }
+
+        // Si hay imagen, la leemos como base64
+        if (archivoImagen) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                guardarReceta(e.target.result);
+            };
+            reader.readAsDataURL(archivoImagen);
+        } else {
+            guardarReceta("");
+        }
+    });
+    </script>
+</body>
+</html>
